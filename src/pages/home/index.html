@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>prediBuild — Gestión inteligente</title>
+  
+  <!-- Estilos compartidos -->
+  <link rel="stylesheet" href="/src/shared/global.css">
+  
+  <!-- Estilos de componentes -->
+  <link rel="stylesheet" href="/src/components/navbar/navbar.css">
+  <link rel="stylesheet" href="/src/components/footer/footer.css">
+  
+  <!-- Estilos específicos de Home -->
+  <link rel="stylesheet" href="./home.css">
+</head>
+<body>
+
+  <!-- Navbar (se carga dinámicamente) -->
+  <div id="navbar-container"></div>
+
+  <!-- ========================================
+       HERO SECTION
+       ======================================== -->
+  <section class="hero">
+    <div class="hero-badge">Plataforma local</div>
+    <h1>Predice y gestiona <br/><em>tu construcción.</em></h1>
+    <p class="hero-sub">Sin dependencias externas, máxima velocidad con Vite.</p>
+    
+    <div class="hero-actions">
+      <a href="#cta" class="btn-hero-primary">Comenzar ahora</a>
+    </div>
+    
+    <!-- Mockup de interfaz -->
+    <div class="hero-mockup">
+      <div class="mockup-screen">
+        <div class="mock-sidebar">
+          <div class="mock-nav-item"></div>
+          <div class="mock-nav-item"></div>
+          <div class="mock-nav-item"></div>
+        </div>
+        <div class="mock-content">
+          <div class="mock-card" style="height: 40px; margin-bottom: 15px;"></div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="mock-card"></div>
+            <div class="mock-card"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       TARJETAS INFORMATIVAS
+       ======================================== -->
+  <section class="features-grid" id="features">
+    <div class="container">
+      <h2 class="section-title">Resuelve el desorden que atrasa tu proyecto</h2> 
+      
+      <div class="grid-wrapper">
+        <!-- Tarjeta 1: Control operativo -->
+        <div class="feature-card grey-light">
+          <div class="card-icon">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <span class="card-tag">Control operativo</span>
+          <h3>Almacena y ordena tu documentación</h3>
+          <p>Centraliza toda tu información, ordena documentos, información, incidencias, cambios.</p>
+        </div>
+
+        <!-- Tarjeta 2: Incidencias -->
+        <div class="feature-card blue-light">
+          <div class="card-icon">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+          </div>
+          <span class="card-tag">Revisa tus incidencias</span>
+          <h3>Resuelve las incompatibilidades</h3>
+          <p>Control completo de cambios y resolución de conflictos en los modelos</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       TARJETA EXPANDIBLE
+       ======================================== -->
+  <section class="expandable-feature">
+    <div class="container">
+      <div class="feature-card red-light">
+        <!-- Contenido visible -->
+        <div class="card-header">
+          <div class="card-icon">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <span class="card-tag">Revisa el avance</span>
+          <h3>Controla los avances de tu diseño y cómo este se transforma en algo real</h3>
+          <p>Visualiza, controla y observa todos los cambios efectuados</p>
+          
+          <!-- Botón para expandir -->
+          <button class="card-toggle" aria-label="Ver más detalles">
+            Ver más
+            <svg class="chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Contenido expandible -->
+        <div class="card-expandable">   
+          <div class="card-expanded-content">
+            <h4>Visualiza tu proyecto en 3D</h4>
+            <p>Visualiza tu proyecto en 3D, controla los avances de tu día y mantén todo sincronizado.</p>
+            
+            <!-- Placeholder para imagen -->
+            <div class="card-image">
+              <img src="https://via.placeholder.com/600x350/f43f5e/ffffff?text=Vista+3D+del+Proyecto" alt="Vista 3D del proyecto">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer (se carga dinámicamente) -->
+  <div id="footer-container"></div>
+
+  <!-- Scripts -->
+  <script type="module" src="./home.js"></script>
+</body>
+</html>

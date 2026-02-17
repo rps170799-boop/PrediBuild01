@@ -1,0 +1,745 @@
+/* ========================================
+   1. RESET Y VARIABLES GLOBALES
+   Variables CSS personalizables en :root
+   ======================================== */
+*, *::before, *::after { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
+
+:root {
+  /* Colores principales de marca */
+  --color-primario:   #5297ff;  /* Azul principal (antes --orange) */
+  --color-secundario: #fb923c;  /* Naranja secundario (antes --orange2) */
+  
+  /* Colores de fondo y superficie */
+  --color-oscuro:     #0b1120;  /* Fondo oscuro principal */
+  --color-oscuro-alt: #111827;  /* Fondo oscuro alternativo */
+  --color-claro:      #f9fafb;  /* Fondo claro */
+  --color-blanco:     #ffffff;  /* Blanco puro */
+  
+  /* Colores de texto */
+  --color-texto:      #111827;  /* Texto principal */
+  --color-texto-muted:#151516fc; /* Texto secundario/suave */
+  
+  /* Bordes y separadores */
+  --color-borde:      #e5e7eb;
+  
+  /* Tipografía */
+  --fuente-principal: system-ui, -apple-system, sans-serif;
+}
+
+html { 
+  scroll-behavior: smooth; 
+}
+
+body { 
+  font-family: var(--fuente-principal); 
+  color: var(--color-texto); 
+  background: var(--color-blanco); 
+  overflow-x: hidden; 
+}
+
+/* ========================================
+   2. NAVBAR (Barra de navegación superior)
+   ======================================== */
+nav {
+  position: sticky; 
+  top: 0; 
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Logo de la navbar */
+.logo { 
+  display: flex; 
+  align-items: center; 
+  gap: 10px; 
+  text-decoration: none; 
+  color: var(--color-texto); 
+  flex: 0 0 200px;
+}
+
+.logo-box { 
+  width: 36px; 
+  height: 36px; 
+  border-radius: 9px; 
+  background: var(--color-oscuro); 
+  display: grid; 
+  place-items: center; 
+}
+
+.logo-box svg { 
+  width: 18px; 
+  height: 18px; 
+  color: var(--color-primario); 
+}
+
+.logo-name { 
+  font-weight: 700; 
+  font-size: 18px; 
+  letter-spacing: -0.4px; 
+}
+
+.logo-name span { 
+  color: var(--color-primario); 
+}
+
+/* Enlaces de navegación */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+  justify-content: center;
+}
+
+.nav-links a, 
+.dropdown-toggle {
+  text-decoration: none; 
+  color: var(--color-texto-muted);
+  font-size: 14px; 
+  font-weight: 500;
+  padding: 8px 14px; 
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.nav-links a:hover, 
+.dropdown-toggle:hover { 
+  color: var(--color-primario);
+}
+
+/* Botón CTA de la navbar */
+.nav-cta { 
+  display: flex; 
+  justify-content: flex-end; 
+  flex: 0 0 200px; 
+}
+
+/* Botón hamburguesa (móvil) */
+.menu-toggle {
+  display: none;
+  background: none; 
+  border: none;
+  color: var(--color-texto); 
+  cursor: pointer; 
+  padding: 10px;
+  z-index: 3000;
+}
+
+.menu-toggle svg { 
+  width: 28px; 
+  height: 28px; 
+  pointer-events: none;
+}
+
+/* ========================================
+   3. DROPDOWNS (Menús desplegables)
+   ======================================== */
+.dropdown { 
+  position: relative; 
+}
+
+.dropdown-menu {
+  position: absolute; 
+  top: 100%; 
+  left: 50%;
+  transform: translateX(-50%) translateY(10px); 
+  min-width: 260px;
+  padding-top: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1100;
+}
+
+.dropdown-menu.is-visible {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateX(-50%) translateY(0);
+}
+
+.dropdown-content {
+  background: var(--color-blanco);
+  border: 1px solid var(--color-borde);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Items dentro del dropdown */
+.dropdown-item {
+  display: flex; 
+  align-items: center; 
+  gap: 12px;
+  padding: 10px; 
+  border-radius: 8px;
+  text-decoration: none; 
+  color: var(--color-texto);
+  transition: background 0.2s;
+}
+
+.dropdown-item:hover { 
+  background: var(--color-claro); 
+}
+
+/* Icono del item */
+.di-icon {
+  width: 34px; 
+  height: 34px; 
+  border-radius: 8px;
+  background: var(--color-claro); 
+  display: grid; 
+  place-items: center; 
+  flex-shrink: 0;
+}
+
+.di-icon svg { 
+  width: 16px !important; 
+  height: 16px !important; 
+  color: var(--color-primario); 
+}
+
+.dropdown-item strong { 
+  display: block; 
+  font-size: 13px; 
+  font-weight: 600; 
+  color: var(--color-oscuro); 
+}
+
+.dropdown-item span { 
+  display: block; 
+  font-size: 11px; 
+  color: var(--color-texto-muted); 
+}
+
+/* Flecha del dropdown */
+.icon-arrow {
+  width: 14px !important;
+  height: 14px !important;
+  transition: transform 0.2s ease;
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 4px;
+  flex-shrink: 0;
+}
+
+/* ========================================
+   4. HERO SECTION (Sección principal)
+   ======================================== */
+.hero {
+  background: var(--color-oscuro);
+  padding: 80px 24px 0; 
+  text-align: center;
+  position: relative; 
+  overflow: hidden;
+  color: white;
+}
+
+.hero-badge {
+  display: inline-flex; 
+  align-items: center;
+  background: rgba(82, 151, 255, 0.1); 
+  border: 1px solid rgba(82, 151, 255, 0.2);
+  color: var(--color-primario); 
+  font-size: 12px; 
+  font-weight: 600;
+  padding: 6px 16px; 
+  border-radius: 99px; 
+  margin-bottom: 24px;
+}
+
+.hero h1 {
+  font-size: clamp(32px, 5vw, 64px); 
+  font-weight: 800; 
+  line-height: 1.1;
+  max-width: 850px; 
+  margin: 0 auto 20px; 
+  letter-spacing: -1.5px;
+}
+
+.hero h1 em { 
+  font-style: normal; 
+  color: var(--color-primario); 
+}
+
+.hero-sub { 
+  color: rgba(255, 255, 255, 0.6); 
+  max-width: 580px; 
+  margin: 0 auto 35px; 
+  font-size: 18px; 
+}
+
+/* ========================================
+   5. BOTONES
+   ======================================== */
+.btn-solid {
+  padding: 10px 20px; 
+  border-radius: 50px; 
+  background: var(--color-primario);
+  color: white; 
+  font-weight: 600; 
+  text-decoration: none; 
+  font-size: 14px;
+}
+
+.btn-hero-primary {
+  padding: 16px 32px; 
+  border-radius: 50px; 
+  background: var(--color-primario);
+  color: white; 
+  font-weight: 700; 
+  text-decoration: none; 
+  display: inline-block;
+  font-size: 16px;
+}
+
+/* ========================================
+   6. MOCKUP (Simulación de interfaz)
+   ======================================== */
+.hero-mockup {
+  max-width: 1000px; 
+  margin: 50px auto 0;
+  background: #1a2030; 
+  border-radius: 20px 20px 0 0;
+  padding: 15px 15px 0; 
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mockup-screen {
+  background: #0d1117; 
+  border-radius: 12px 12px 0 0;
+  padding: 25px; 
+  min-height: 300px; 
+  display: flex; 
+  gap: 20px;
+}
+
+.mock-sidebar { 
+  width: 180px; 
+  flex-shrink: 0; 
+}
+
+.mock-nav-item { 
+  height: 30px; 
+  background: rgba(255, 255, 255, 0.05); 
+  border-radius: 6px; 
+  margin-bottom: 12px; 
+}
+
+.mock-content { 
+  flex: 1; 
+}
+
+.mock-card { 
+  height: 100px; 
+  background: rgba(255, 255, 255, 0.05); 
+  border-radius: 10px; 
+}
+
+/* ========================================
+   7. FEATURE CARDS (Tarjetas de características)
+   ======================================== */
+.features-grid {
+  padding: 100px 24px;
+  background: var(--color-blanco);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 60px;
+  line-height: 1.2;
+  color: var(--color-oscuro);
+}
+
+/* Grid de 3 columnas */
+.grid-wrapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 25px;
+  justify-content: center;
+  align-items: stretch;
+}
+
+/* Estilos de la tarjeta */
+.feature-card {
+  padding: 20px;
+  border-radius: 24px;
+  border: 1px solid var(--color-borde);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+}
+
+/* Colores de fondo de las tarjetas */
+.grey-light { 
+  background: linear-gradient(135deg, #fffcf9 0%, #fff5ed 100%); 
+  border-color: #ffedd5; 
+}
+
+.blue-light { 
+  background: linear-gradient(135deg, #ffffff 0%, #e7fdff 100%); 
+  border-color: #ade0ff; 
+}
+
+.red-light { 
+  background: linear-gradient(135deg, #fff5f5 0%, #fff1f2 100%); 
+  border-color: #ffe4e6; 
+}
+
+/* Icono de la tarjeta */
+.card-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.feature-card.grey-light svg { color: #979997; }
+.feature-card.blue-light svg { color: #5c61ff; }
+.feature-card.red-light svg { color: #f43f5e; }
+
+/* Texto de la tarjeta */
+.feature-card h3 {
+  font-size: 20px;
+  margin-bottom: 16px;
+  color: var(--color-oscuro);
+  line-height: 1.3;
+}
+
+.feature-card p {
+  font-size: 15px;
+  color: var(--color-texto-muted);
+  line-height: 1.6;
+}
+
+/* Botón de expandir tarjeta */
+.card-toggle {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 10px 20px;
+  margin-top: 20px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-oscuro);
+}
+
+.card-toggle:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Flecha del botón (chevron) */
+.card-toggle .chevron {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+}
+
+.card-toggle.active .chevron {
+  transform: rotate(180deg);
+}
+
+/* Contenedor del contenido expandible */
+.card-expandable {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-in-out;
+}
+
+.card-expandable.open {
+  max-height: 600px;
+}
+
+/* Contenido expandido */
+.card-expanded-content {
+  padding: 30px 40px 40px 40px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.card-expanded-content h4 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-primario);
+  margin-bottom: 15px;
+}
+
+.card-expanded-content p {
+  font-size: 15px;
+  color: var(--color-texto-muted);
+  line-height: 1.6;
+  margin-bottom: 25px;
+}
+
+/* Sección de tarjeta expandible (separada) */
+.expandable-feature {
+  padding: 50px 24px 100px;
+  background: var(--color-blanco);
+}
+
+.expandable-feature .feature-card {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Imagen dentro del contenido expandido */
+.card-image {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.card-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ========================================
+   8. FOOTER (Pie de página)
+   ======================================== */
+footer {
+  background: #f9fafb;
+  padding: 80px 24px 40px;
+  border-top: 1px solid var(--color-borde);
+  margin-top: 100px;
+}
+
+/* Parte superior del footer */
+.footer-top {
+  text-align: center;
+  margin-bottom: 60px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Logo del footer */
+.footer-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 20px;
+  text-decoration: none;
+  width: 100%;
+}
+
+.footer-logo svg {
+  width: 40px;
+  height: 40px;
+  color: var(--color-oscuro);
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.footer-logo .logo-name {
+  display: inline-block;
+}
+
+/* Textos del footer */
+.footer-logo p {
+  width: 100%;
+  margin: 5px 0;
+  font-size: 14px;
+  color: var(--color-texto-muted);
+}
+
+.footer-logo p:first-of-type {
+  margin-top: 15px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-texto);
+}
+
+.footer-logo p:last-of-type {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+/* Columnas de enlaces del footer */
+.footer-columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding-top: 40px;
+  border-top: 1px solid var(--color-borde);
+}
+
+.footer-col h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-oscuro);
+  margin-bottom: 20px;
+}
+
+.footer-col ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-col li {
+  margin-bottom: 12px;
+}
+
+.footer-col a {
+  color: var(--color-texto-muted);
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+.footer-col a:hover {
+  color: var(--color-primario);
+}
+
+
+
+/* ========================================
+   9. RESPONSIVE (Adaptación a móviles)
+   ======================================== */
+
+/* Tablets y móviles grandes (960px o menos) */
+@media (max-width: 960px) {
+  /* Navbar móvil */
+  .menu-toggle { 
+    display: block; 
+  }
+  
+  .nav-cta { 
+    display: none; 
+  }
+  
+
+  .nav-links {
+    position: absolute;
+    top: 70px; 
+    left: 0; 
+    width: 100%;
+    background: white;
+    flex-direction: column;
+    padding: 0 20px; /* Cambiado */
+    border-bottom: 1px solid var(--color-borde);
+    z-index: 2000;
+    
+    /* Propiedades para la animación de caída */
+    max-height: 0; /* Empieza oculto */
+    overflow: hidden; /* Esconde el contenido */
+    opacity: 0; /* Invisible */
+    transform: translateY(-10px); /* Posición inicial arriba */
+    transition: all 0.4s ease-out; /* Animación suave de 0.4s */
+  }
+  
+  .nav-links.active { 
+    max-height: 500px; /* Altura máxima al expandir */
+    padding: 20px; /* Recupera el padding */
+    opacity: 1; /* Visible */
+    transform: translateY(0); /* Posición final normal */
+  }
+
+  
+  .nav-links a, 
+  .dropdown-toggle { 
+    width: 100%; 
+    padding: 15px; 
+    text-align: left; 
+  }
+
+  /* Dropdowns en móvil */
+  .dropdown-menu {
+    position: static;
+    transform: none;
+    width: 100%;
+    display: none;
+    opacity: 1;
+    pointer-events: all;
+    padding-top: 0;
+  }
+  
+  .dropdown-menu.is-visible { 
+    display: block; 
+  }
+  
+  .dropdown-content { 
+    border: none; 
+    box-shadow: none; 
+    background: var(--color-claro); 
+  }
+
+  /* Tarjetas en móvil (1 columna) */
+  .grid-wrapper {
+    grid-template-columns: 1fr; 
+    gap: 20px;
+  }
+  
+  .section-title { 
+    font-size: 26px; 
+    text-align: center; 
+  }
+  
+  .feature-card { 
+    padding: 30px; 
+  }
+  
+  .card-header {
+    padding: 30px;
+  }
+  
+  .card-expanded-content {
+    padding: 20px 30px 30px 30px;
+  }
+}
+
+/* Móviles pequeños (768px o menos) */
+@media (max-width: 768px) {
+  /* Footer móvil */
+  footer {
+    padding: 60px 20px 30px;
+  }
+
+  .footer-top {
+    margin-bottom: 40px;
+  }
+
+  .footer-columns {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    text-align: center;
+  }
+}

@@ -1,0 +1,48 @@
+/* ========================================
+   VARIABLES GLOBALES Y RESET
+   ======================================== */
+*, *::before, *::after { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
+
+:root {
+  /* Colores principales de marca */
+  --color-primario:   #5297ff;
+  --color-secundario: #fb923c;
+  
+  /* Colores de fondo y superficie */
+  --color-oscuro:     #0b1120;
+  --color-oscuro-alt: #111827;
+  --color-claro:      #f9fafb;
+  --color-blanco:     #ffffff;
+  
+  /* Colores de texto */
+  --color-texto:      #111827;
+  --color-texto-muted:#151516fc;
+  
+  /* Bordes y separadores */
+  --color-borde:      #e5e7eb;
+  
+  /* Tipografía */
+  --fuente-principal: system-ui, -apple-system, sans-serif;
+}
+
+html { 
+  scroll-behavior: smooth; 
+}
+
+body { 
+  font-family: var(--fuente-principal); 
+  color: var(--color-texto); 
+  background: var(--color-blanco); 
+  overflow-x: hidden; 
+}
+
+/* Contenedor del navbar debe permitir sticky */
+#navbar-container {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
