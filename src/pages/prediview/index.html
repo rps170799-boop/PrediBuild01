@@ -24,74 +24,74 @@
        CONTENIDO PRINCIPAL - VISOR IFC
        ======================================== -->
   <main class="prediview-main">
-    <div class="container">
+    
+    <!-- Header de la página -->
+    <div class="page-header">
+      <h1>prediView</h1>
+      <p class="page-subtitle">Visualiza tus modelos IFC en 3D directamente desde el navegador</p>
+    </div>
+
+    <!-- Contenedor del visor IFC - FUERA DEL CONTAINER -->
+    <div class="viewer-container">
       
-      <!-- Header de la página -->
-      <div class="page-header">
-        <h1>prediView</h1>
-        <p class="page-subtitle">Visualiza tus modelos IFC en 3D directamente desde el navegador</p>
-      </div>
-
-      <!-- Contenedor del visor IFC -->
-      <div class="viewer-container">
+      <!-- Panel de controles -->
+      <div class="viewer-sidebar">
+        <h3>Controles</h3>
         
-        <!-- Panel de controles -->
-        <div class="viewer-sidebar">
-          <h3>Controles</h3>
-          
-          <div class="control-group">
-            <label for="file-input" class="btn-upload">
-              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-              </svg>
-              Cargar modelo IFC
-            </label>
-            <input 
-              type="file" 
-              id="file-input" 
-              accept=".ifc" 
-              style="display: none;"
-            >
-          </div>
-
-          <div class="control-group">
-            <h4>Vista</h4>
-            <button class="btn-control" id="reset-camera">
-              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-              </svg>
-              Reset cámara
-            </button>
-            <button class="btn-control" id="fit-model">
-              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
-              </svg>
-              Ajustar vista
-            </button>
-          </div>
-
-          <div class="control-group">
-            <h4>Modelo</h4>
-            <div class="model-info">
-              <p><strong>Elementos:</strong> <span id="element-count">-</span></p>
-              <p><strong>Tamaño:</strong> <span id="file-size">-</span></p>
-            </div>
-          </div>
+        <div class="control-group">
+          <label for="file-input" class="btn-upload">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+            </svg>
+            Cargar modelo IFC
+          </label>
+          <input 
+            type="file" 
+            id="file-input" 
+            accept=".ifc" 
+            style="display: none;"
+          >
         </div>
 
-        <!-- Canvas del visor 3D -->
-        <div class="viewer-canvas" id="ifc-viewer">
-          <div class="viewer-placeholder">
-            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        <div class="control-group">
+          <h4>Vista</h4>
+          <button class="btn-control" id="reset-camera">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
             </svg>
-            <p>Carga un archivo IFC para comenzar</p>
+            Reset cámara
+          </button>
+          <button class="btn-control" id="fit-model">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+            </svg>
+            Ajustar vista
+          </button>
+        </div>
+
+        <div class="control-group">
+          <h4>Modelo</h4>
+          <div class="model-info">
+            <p><strong>Elementos:</strong> <span id="element-count">-</span></p>
+            <p><strong>Tamaño:</strong> <span id="file-size">-</span></p>
           </div>
         </div>
       </div>
 
-      <!-- Información adicional -->
-      <div class="info-section">
+      <!-- Canvas del visor 3D -->
+      <div class="viewer-canvas" id="ifc-viewer">
+        <div class="viewer-placeholder">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          </svg>
+          <p>Carga un archivo IFC para comenzar</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Información adicional - DENTRO DE CONTAINER -->
+    <div class="info-section">
+      <div class="container">
         <h2>Acerca del visor IFC</h2>
         <div class="info-grid">
           <div class="info-card">
@@ -117,8 +117,8 @@
           </div>
         </div>
       </div>
-
     </div>
+
   </main>
 
   <!-- Footer (se carga dinámicamente) -->
