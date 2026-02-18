@@ -10,5 +10,11 @@
   },
   "devDependencies": {
     "vite": "^7.3.1"
+  },
+  "dependencies": {
+    "@thatopen/components": "^2.4.11",
+    "@thatopen/fragments": "^3.0.11",
+    "three": "^0.175.0",
+    "web-ifc": "^0.0.68"
   }
 }

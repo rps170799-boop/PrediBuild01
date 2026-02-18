@@ -12,20 +12,20 @@
 /* PAGE HEADER - Ancho completo */
 .page-header {
   text-align: center;
-  padding: 40px 20px;
+  padding: 20px 20px; /* Reducido de 40px a 20px */
   background: white;
   border-bottom: 1px solid var(--color-borde);
 }
 
 .page-header h1 {
-  font-size: clamp(36px, 5vw, 56px);
+  font-size: clamp(28px, 4vw, 42px); /* Reducido */
   font-weight: 800;
   color: var(--color-oscuro);
-  margin-bottom: 15px;
+  margin-bottom: 10px; /* Reducido margen */
 }
 
 .page-subtitle {
-  font-size: 18px;
+  font-size: 15px; /* Reducido de 18px */
   color: var(--color-texto-muted);
   max-width: 600px;
   margin: 0 auto;
@@ -36,7 +36,7 @@
   display: grid;
   grid-template-columns: 320px 1fr;
   gap: 0;
-  height: calc(100vh - 210px);
+  height: calc(100vh - 150px); /* Ajustado: navbar(70px) + header(80px) */
   background: white;
   border-radius: 0;
   padding: 0;

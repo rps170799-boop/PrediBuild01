@@ -13,6 +13,7 @@ nav {
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--color-borde);
 }
+
 .nav-inner {
   max-width: 1200px;
   margin: 0 auto;

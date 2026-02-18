@@ -40,9 +40,3 @@ body {
   overflow-x: hidden; 
 }
 
-/* Contenedor del navbar debe permitir sticky */
-#navbar-container {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
