@@ -4,127 +4,142 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>prediView — Visor IFC | prediBuild</title>
-  
-  <!-- Estilos compartidos -->
   <link rel="stylesheet" href="/src/shared/global.css">
-  
-  <!-- Estilos de componentes -->
   <link rel="stylesheet" href="/src/components/navbar/navbar.css">
   <link rel="stylesheet" href="/src/components/footer/footer.css">
-  
-  <!-- Estilos específicos de prediView -->
   <link rel="stylesheet" href="./prediview.css">
 </head>
 <body>
 
-  <!-- Navbar (se carga dinámicamente) -->
   <div id="navbar-container"></div>
 
-  <!-- ========================================
-       CONTENIDO PRINCIPAL - VISOR IFC
-       ======================================== -->
   <main class="prediview-main">
-    
-    <!-- Header de la página -->
+
     <div class="page-header">
       <h1>prediView</h1>
       <p class="page-subtitle">Visualiza tus modelos IFC en 3D directamente desde el navegador</p>
     </div>
 
-    <!-- Contenedor del visor IFC - FUERA DEL CONTAINER -->
     <div class="viewer-container">
-      
-      <!-- Panel de controles -->
+
+      <!-- SIDEBAR -->
       <div class="viewer-sidebar">
-        <h3>Controles</h3>
-        
         <div class="control-group">
-          <label for="file-input" class="btn-upload">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-            </svg>
-            Cargar modelo IFC
+          <label for="file-input" class="btn-upload-sm">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            Cargar IFC
           </label>
-          <input 
-            type="file" 
-            id="file-input" 
-            accept=".ifc" 
-            style="display: none;"
-          >
+          <input type="file" id="file-input" accept=".ifc" style="display: none;">
         </div>
-
         <div class="control-group">
-          <h4>Vista</h4>
-          <button class="btn-control" id="reset-camera">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-            </svg>
-            Reset cámara
-          </button>
-          <button class="btn-control" id="fit-model">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
-            </svg>
-            Ajustar vista
-          </button>
-        </div>
-
-        <div class="control-group">
-          <h4>Modelo</h4>
-          <div class="model-info">
-            <p><strong>Elementos:</strong> <span id="element-count">-</span></p>
-            <p><strong>Tamaño:</strong> <span id="file-size">-</span></p>
+          <div class="btn-row">
+            <button class="btn-sm" id="reset-camera"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>Reset</button>
+            <button class="btn-sm" id="fit-model"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>Ajustar</button>
           </div>
+        </div>
+        <div class="control-group">
+          <h4>Modelos <span class="model-badge" id="model-count">0</span></h4>
+          <div id="model-list" class="model-list"><p class="models-empty">Sin modelos cargados</p></div>
+        </div>
+        <div class="sidebar-spacer"></div>
+        <div class="sidebar-footer">
+          <p class="sidebar-hint">
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Usa la barra de herramientas del visor para cambiar entre modos
+          </p>
         </div>
       </div>
 
-      <!-- Canvas del visor 3D -->
+      <!-- CANVAS 3D -->
       <div class="viewer-canvas" id="ifc-viewer">
         <div class="viewer-placeholder">
-          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-          </svg>
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
           <p>Carga un archivo IFC para comenzar</p>
         </div>
       </div>
+
+      <!-- TOOLBAR -->
+      <div class="viewer-toolbar">
+
+        <button class="toolbar-btn active" id="tool-select" title="Seleccionar">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/></svg>
+          <span class="toolbar-label">Seleccionar</span>
+        </button>
+
+        <div class="toolbar-sep"></div>
+
+        <button class="toolbar-btn" id="tool-section" title="Sección">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12h16"/><path d="M12 4v16"/></svg>
+          <span class="toolbar-label">Sección</span>
+          <span class="toolbar-badge" id="section-count"></span>
+        </button>
+
+        <!-- Sub-menú sección -->
+        <div class="section-submenu" id="section-submenu">
+          <button class="toolbar-sub-btn active" id="section-face" title="Corte por cara">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 12h18"/></svg>
+          </button>
+          <button class="toolbar-sub-btn" id="section-x" title="Plano X"><span class="axis-letter axis-x">X</span></button>
+          <button class="toolbar-sub-btn" id="section-y" title="Plano Y"><span class="axis-letter axis-y">Y</span></button>
+          <button class="toolbar-sub-btn" id="section-z" title="Plano Z"><span class="axis-letter axis-z">Z</span></button>
+          <span class="section-status" id="section-status">Click en una cara para previsualizar</span>
+        </div>
+
+        <button class="toolbar-btn toolbar-btn-danger" id="tool-delete-sections" title="Borrar secciones">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          <span class="toolbar-label">Borrar cortes</span>
+        </button>
+
+        <div class="toolbar-sep"></div>
+
+        <button class="toolbar-btn" id="tool-coords" title="Coordenadas">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg>
+          <span class="toolbar-label">Coordenadas</span>
+        </button>
+
+      </div>
+
+      <!-- POPUP PROPIEDADES -->
+      <div id="props-popup" class="props-popup">
+        <div class="props-header">
+          <span class="props-title">Propiedades</span>
+          <button id="props-close" class="props-header-btn"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg></button>
+        </div>
+        <div id="props-content" class="props-content"></div>
+        <div class="props-footer">
+          <button id="props-clear" class="btn-sm btn-deselect-sm">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+            Deseleccionar
+          </button>
+        </div>
+      </div>
+
+      <!-- POPUP COORDENADAS -->
+      <div id="coords-popup" class="coords-popup">
+        <div class="props-header">
+          <span class="props-title">Coordenadas</span>
+          <button id="coords-close" class="props-header-btn"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg></button>
+        </div>
+        <div id="coords-content" class="coords-content"></div>
+      </div>
+
     </div>
 
-    <!-- Información adicional - DENTRO DE CONTAINER -->
+    <!-- Info -->
     <div class="info-section">
       <div class="container">
         <h2>Acerca del visor IFC</h2>
         <div class="info-grid">
-          <div class="info-card">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
-            </svg>
-            <h3>Rápido y eficiente</h3>
-            <p>Carga y visualiza modelos IFC directamente en tu navegador sin instalaciones adicionales.</p>
-          </div>
-          <div class="info-card">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-            </svg>
-            <h3>100% local</h3>
-            <p>Tus archivos se procesan localmente, garantizando total privacidad de tus proyectos.</p>
-          </div>
-          <div class="info-card">
-            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-            </svg>
-            <h3>Compatible con IFC 2x3 y 4</h3>
-            <p>Soporte completo para las versiones más utilizadas del formato IFC.</p>
-          </div>
+          <div class="info-card"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><h3>Rápido y eficiente</h3><p>Carga y visualiza modelos IFC directamente en tu navegador sin instalaciones adicionales.</p></div>
+          <div class="info-card"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg><h3>100% local</h3><p>Tus archivos se procesan localmente, garantizando total privacidad de tus proyectos.</p></div>
+          <div class="info-card"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg><h3>Compatible con IFC 2x3 y 4</h3><p>Soporte completo para las versiones más utilizadas del formato IFC.</p></div>
         </div>
       </div>
     </div>
 
   </main>
 
-  <!-- Footer (se carga dinámicamente) -->
   <div id="footer-container"></div>
-
-  <!-- Scripts -->
   <script type="module" src="./prediview.js"></script>
 </body>
 </html>
