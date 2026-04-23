@@ -8,8 +8,11 @@
 .page-subtitle { font-size: 14px; color: var(--color-texto-muted); max-width: 600px; margin: 0 auto; }
 
 .viewer-container {
-  display: grid; grid-template-columns: 260px 1fr; gap: 0;
+  display: grid;
+  grid-template-columns: 260px 1fr auto;
+  gap: 0;
   height: calc(100vh - 140px); background: white; margin: 0; width: 100%; position: relative;
+  overflow: hidden;
 }
 
 /* SIDEBAR */
@@ -229,4 +232,154 @@
   .props-popup, .coords-popup { width: 220px; max-height: 300px; top: 8px; right: 8px; }
   .info-grid { grid-template-columns: 1fr; gap: 20px; }
   .info-section { padding: 60px 20px; }
+  .viewer-container.viewer-has-clash { grid-template-columns: 1fr; }
+  .viewer-container.viewer-has-clash .clash-panel { max-width: 100%; width: 100%; height: 340px; border-left: none; border-top: 1px solid var(--color-borde); }
 }
+
+/* ========================================
+   CLASH DETECTIVE PANEL — DOCKED RIGHT COLUMN
+   ======================================== */
+
+.clash-panel {
+  /* Docked column: no absolute positioning */
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-left: 1px solid var(--color-borde);
+  height: 100%;
+  overflow: hidden;
+  /* Hidden by default — max-width + opacity transition for smooth reveal */
+  max-width: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: max-width 0.28s ease, opacity 0.22s ease;
+  /* Ensure the table header stays sticky inside this scroll container */
+  min-width: 0;
+}
+.viewer-container.viewer-has-clash .clash-panel {
+  max-width: 320px;
+  width: 320px;
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Setup area */
+.clash-setup { padding: 10px 12px 8px; border-bottom: 1px solid var(--color-borde); flex-shrink: 0; }
+.clash-select-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.clash-label { font-size: 11px; font-weight: 600; color: var(--color-texto-muted); white-space: nowrap; min-width: 110px; }
+.clash-role { font-weight: 400; color: var(--color-texto-muted); opacity: 0.7; }
+.clash-select {
+  flex: 1; padding: 5px 8px;
+  border: 1px solid var(--color-borde); border-radius: 6px;
+  font-size: 11px; color: var(--color-oscuro);
+  background: white; cursor: pointer; outline: none;
+  min-width: 0;
+}
+.clash-select:focus { border-color: var(--color-primario); }
+
+/* Action buttons */
+.clash-tolerance-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }\n.clash-tolerance-input {\n  width: 70px;\n  padding: 3px 6px;\n  font-size: 11px;\n  border: 1px solid var(--color-borde);\n  border-radius: 4px;\n  background: var(--color-fondo);\n  color: var(--color-texto);\n  text-align: right;\n}\n.clash-tolerance-input:focus { outline: none; border-color: var(--color-primario); }\n.clash-actions { display: flex; gap: 6px; margin-top: 8px; }
+.clash-btn-align { color: #0ea5e9; border-color: #bae6fd; flex-shrink: 0; }
+.clash-btn-align:hover { background: #f0f9ff; border-color: #38bdf8; color: #0284c7; }
+.clash-btn-run { background: var(--color-primario); color: white; border-color: var(--color-primario); flex: 1; justify-content: center; }
+.clash-btn-run:hover { background: var(--color-secundario); border-color: var(--color-secundario); }
+.clash-status { font-size: 10px; color: var(--color-texto-muted); margin-top: 6px; min-height: 14px; }
+
+/* Results */
+.clash-results { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+
+/* Reset-isolation bar */
+.clash-reset-bar {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  background: #fef3c7;
+  border-bottom: 1px solid #fde68a;
+  display: flex;
+  align-items: center;
+}
+.clash-btn-reset {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #92400e;
+  background: #fde68a;
+  border: 1px solid #f59e0b;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.clash-btn-reset:hover { background: #fcd34d; }
+.clash-summary {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-oscuro);
+  border-bottom: 1px solid var(--color-borde);
+  flex-shrink: 0;
+}
+.clash-count { color: #dc2626; font-size: 13px; }
+.clash-ok    { color: #16a34a; }
+
+/* Table */
+.clash-table-wrap { flex: 1; overflow-y: auto; }
+.clash-table { width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed; }
+.clash-table col:nth-child(1) { width: 28px; }
+.clash-table col:nth-child(2) { width: 72px; }
+.clash-table col:nth-child(3) { width: auto; }
+.clash-table col:nth-child(4) { width: auto; }
+.clash-table thead tr { background: var(--color-claro); position: sticky; top: 0; z-index: 1; }
+.clash-table th {
+  padding: 5px 8px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--color-texto-muted);
+  border-bottom: 1px solid var(--color-borde);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.clash-table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  color: var(--color-oscuro);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.clash-table td:first-child { color: var(--color-texto-muted); font-weight: 600; }
+
+/* Colored dot indicator for clash columns */
+.clash-cell-a::before {
+  content: '';
+  display: inline-block;
+  width: 7px; height: 7px;
+  background: #ef4444;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.clash-cell-b::before {
+  content: '';
+  display: inline-block;
+  width: 7px; height: 7px;
+  background: #22c55e;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.clash-table tbody tr { cursor: pointer; transition: background 0.12s; }
+.clash-table tbody tr:hover { background: rgba(82,151,255,0.06); }
+.clash-table tbody tr.selected { background: rgba(82,151,255,0.12); }
+.clash-table tbody tr.selected td { color: var(--color-primario); }
+.clash-more { text-align: center; color: var(--color-texto-muted); font-style: italic; padding: 8px; }
+
+.clash-table-wrap::-webkit-scrollbar { width: 3px; }
+.clash-table-wrap::-webkit-scrollbar-thumb { background: var(--color-borde); border-radius: 3px; }

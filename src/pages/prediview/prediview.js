@@ -6,6 +6,7 @@ import { loadFooter } from '/src/components/footer/footer.js';
 import * as OBC from '@thatopen/components';
 import * as FRAGS from '@thatopen/fragments';
 import * as THREE from 'three';
+import { CoordinationService } from './coordination-service.js';
 
 loadNavbar();
 loadFooter();
@@ -27,6 +28,20 @@ const world = worlds.create(
 world.scene = new OBC.SimpleScene(components);
 world.scene.setup();
 world.scene.three.background = null;
+
+// ---- Lighting ----
+// OBC SimpleScene.setup() adds a basic ambient; supplement with directional
+// lights for depth and shading on lit materials (MeshLambertMaterial, etc.)
+const _hemiLight = new THREE.HemisphereLight(0xffffff, 0x8bacd4, 0.6);
+world.scene.three.add(_hemiLight);
+
+const _sunLight = new THREE.DirectionalLight(0xffffff, 1.4);
+_sunLight.position.set(60, 100, 40);
+world.scene.three.add(_sunLight);
+
+const _fillLight = new THREE.DirectionalLight(0xd0e8ff, 0.5);
+_fillLight.position.set(-40, 20, -60);
+world.scene.three.add(_fillLight);
 
 container.innerHTML = '';
 world.renderer = new OBC.SimpleRenderer(components, container);
@@ -80,6 +95,20 @@ await ifcLoader.setup({
   autoSetWasm: false,
   wasm: { path: 'https://unpkg.com/web-ifc@0.0.77/', absolute: true }
 });
+
+// ========================================
+// COORDINATION SERVICE
+// ========================================
+
+const coordinator = new CoordinationService(components, fragments);
+
+coordinator.onProgress(({ phase, done, total }) => {
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  updateClashStatus(`⏳ ${phase === 'broad' ? 'Fase AABB' : 'Fase geometría'}: ${pct}%`);
+});
+
+// OBC.Hider — per-element show/hide for isolation mode
+const hider = components.get(OBC.Hider);
 
 // ========================================
 // RAYCASTER
@@ -599,6 +628,8 @@ async function loadIfc(fileInput, isUrl = false) {
     });
     loadedModels[modelId] = { name: fileName, visible: true, size: fileSize };
     updateModelList();
+    updateClashSelectors();
+    coordinator.indexStoreys(modelId).catch(err => console.warn('[Clash] Storey index:', err));
     const model = fragments.list.get(modelId);
     if (model) setTimeout(() => world.camera.fit([model.object]), 100);
   } catch (error) {
@@ -631,4 +662,332 @@ window.addEventListener('resize', () => {
 
 updateModelList();
 setActiveTool('select');
+
+// ========================================
+// CLASH DETECTIVE
+// ========================================
+
+const clashPanel     = document.getElementById('clash-panel');
+const clashModelAEl  = document.getElementById('clash-model-a');
+const clashModelBEl  = document.getElementById('clash-model-b');
+const clashStatusEl  = document.getElementById('clash-status');
+const clashResultsEl = document.getElementById('clash-results');
+const clashSummaryEl = document.getElementById('clash-summary');
+const clashTbodyEl   = document.getElementById('clash-tbody');
+
+/** Stored array of all clash results for the current run */
+let _lastClashes = [];
+
+function updateClashStatus(text) {
+  if (clashStatusEl) clashStatusEl.textContent = text;
+}
+
+/** Populate both <select> dropdowns from loadedModels */
+function updateClashSelectors() {
+  const ids = Object.keys(loadedModels);
+  [clashModelAEl, clashModelBEl].forEach((sel, idx) => {
+    if (!sel) return;
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">— Selecciona modelo —</option>';
+    ids.forEach((id) => {
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = loadedModels[id].name;
+      if (id === prev) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    // Auto-select first/second model for convenience
+    if (!prev && ids.length > idx) sel.value = ids[idx];
+  });
+}
+
+/** Separate highlight colors for each clash element */
+const clashColorA = new THREE.Color('#ef4444'); // Red   — Structural element
+const clashColorB = new THREE.Color('#22c55e'); // Green — MEP element
+
+// Shared style objects (created once, reused each click)
+const _clashStyleA = { color: clashColorA, renderedFaces: FRAGS.RenderedFaces.ONE, opacity: 1, transparent: false };
+const _clashStyleB = { color: clashColorB, renderedFaces: FRAGS.RenderedFaces.ONE, opacity: 1, transparent: false };
+
+/**
+ * Ghost Mode + Clash Highlight  (four-step sequence that avoids the
+ * preserveOriginalMaterial conflict between setOpacity and fragments.highlight)
+ *
+ * Step 1 — clean slate: resetHighlight clears ALL per-item state.
+ * Step 2 — ghost everything: setOpacity(undefined, 0.06) paints every item
+ *           transparent in the opacity sub-channel. Works reliably with
+ *           undefined (= all items, no ID lookup needed).
+ * Step 3 — un-ghost clash items: resetOpacity([id]) strips the opacity/
+ *           transparent props and the preserveOriginalMaterial flag from
+ *           those two items. Without this step, the next highlight call is
+ *           silently ignored because preserveOriginalMaterial is still set.
+ * Step 4 — apply solid color: fragments.highlight writes fresh color+opacity
+ *           on a now-clean per-item state for just the two clash elements.
+ */
+async function highlightClashPair(clash) {
+  // Step 1 — clean slate
+  await fragments.resetHighlight();
+
+  // Step 2 — ghost all items in every model
+  for (const [, model] of fragments.list) {
+    if (typeof model.setOpacity === 'function') {
+      await model.setOpacity(undefined, 0.06);
+    }
+  }
+
+  // Step 3 — un-ghost the two clash items so their per-item state is clean
+  const modelA = fragments.list.get(clash.aModelId);
+  const modelB = fragments.list.get(clash.bModelId);
+  if (modelA && typeof modelA.resetOpacity === 'function') {
+    await modelA.resetOpacity([clash.aLocalId]);
+  }
+  if (modelB && typeof modelB.resetOpacity === 'function') {
+    await modelB.resetOpacity([clash.bLocalId]);
+  }
+
+  // Step 4 — apply solid red / green highlight (clean state, no merge conflict)
+  await fragments.highlight(_clashStyleA, { [clash.aModelId]: new Set([clash.aLocalId]) });
+  await fragments.highlight(_clashStyleB, { [clash.bModelId]: new Set([clash.bLocalId]) });
+
+  await fragments.core.update(true);
+}
+
+/**
+ * Applies Ghost Mode visualization + zooms camera to the clash point.
+ *  • All models stay visible (no .visible=false).
+ *  • Non-clash geometry is ghosted at 6% opacity.
+ *  • Clash elements are shown solid red/green.
+ *  • Camera frames the precise bounding box of the two elements.
+ */
+async function isolateClashPair(clash) {
+  // Ensure all models are visible (ghost mode, not hidden)
+  for (const [id, model] of fragments.list) {
+    model.object.visible = loadedModels[id]?.visible ?? true;
+  }
+
+  // 1. Apply ghost + clash highlights
+  await highlightClashPair(clash);
+
+  // 2. Precise zoom to the two clash elements
+  await zoomToClashPair(clash);
+
+  // 3. Show reset bar
+  const resetBar = document.getElementById('clash-reset-bar');
+  if (resetBar) resetBar.style.display = 'flex';
+}
+
+/**
+ * Restores the full solid view: clears ALL highlight overrides
+ * (including ghost opacities set by setOpacity) and resets the camera.
+ */
+async function resetClashIsolation() {
+  // resetHighlight with no args clears colour + opacity overrides on all models
+  await fragments.resetHighlight();
+  await fragments.core.update(true);
+
+  world.camera.controls.setLookAt(78, 20, -2.2, 26, -4, 25, true);
+
+  const resetBar = document.getElementById('clash-reset-bar');
+  if (resetBar) resetBar.style.display = 'none';
+
+  clashTbodyEl?.querySelectorAll('tr.selected').forEach(r => r.classList.remove('selected'));
+}
+
+document.getElementById('clash-reset-btn')?.addEventListener('click', () => {
+  resetClashIsolation().catch(console.warn);
+});
+
+/**
+ * Zooms the camera to frame both clashing elements precisely.
+ *
+ * Uses fragments.getBBoxes() — the official OBC v3 API that asks the
+ * Fragments worker for per-element geometry boxes in world space.
+ * This is accurate even after applyBaseCoordinateSystem repositions a model.
+ * Falls back to coordinator._bboxCache if the worker call fails.
+ */
+async function zoomToClashPair(clash) {
+  const isFiniteVec = (v) => isFinite(v.x) && isFinite(v.y) && isFinite(v.z);
+  const merged = new THREE.Box3();
+
+  // --- Primary: fragments.getBBoxes({ modelId: Set<localId> }) ---
+  const clashItemsMap = {
+    [clash.aModelId]: new Set([clash.aLocalId]),
+    [clash.bModelId]: new Set([clash.bLocalId]),
+  };
+
+  let usedApi = false;
+  try {
+    const boxes = await fragments.getBBoxes(clashItemsMap); // returns THREE.Box3[]
+    if (boxes && boxes.length > 0) {
+      for (const b of boxes) {
+        if (b && !b.isEmpty() && isFiniteVec(b.min) && isFiniteVec(b.max)) {
+          merged.union(b);
+          usedApi = true;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[zoomToClashPair] getBBoxes failed, using cache fallback', err.message);
+  }
+
+  // --- Fallback: cached AABBs from extractElementData ---
+  if (!usedApi || merged.isEmpty()) {
+    console.debug('[zoomToClashPair] falling back to coordinator bbox cache',
+      clash.aLocalId, clash.bLocalId);
+    for (const [modelId, localId] of [
+      [clash.aModelId, clash.aLocalId],
+      [clash.bModelId, clash.bLocalId],
+    ]) {
+      const c = coordinator.getElementBbox(modelId, localId);
+      if (c) {
+        merged.union(new THREE.Box3(
+          new THREE.Vector3(c.minX, c.minY, c.minZ),
+          new THREE.Vector3(c.maxX, c.maxY, c.maxZ),
+        ));
+      }
+    }
+  }
+
+  merged.expandByScalar(1.5); // tight padding around the clash point
+
+  if (merged.isEmpty() || !isFiniteVec(merged.min) || !isFiniteVec(merged.max)) {
+    console.error('[zoomToClashPair] No valid box — skipping zoom.',
+      'ExpressIDs:', clash.aLocalId, clash.bLocalId,
+      'min:', merged.min, 'max:', merged.max);
+    return;
+  }
+  console.debug('[zoomToClashPair] box min:', merged.min.toArray(), 'max:', merged.max.toArray());
+
+  try {
+    await world.camera.controls.fitToBox(merged, true);
+  } catch (_) {
+    const center = merged.getCenter(new THREE.Vector3());
+    const size   = merged.getSize(new THREE.Vector3());
+    const dist   = Math.max(size.x, size.y, size.z) * 1.8;
+    world.camera.controls.setLookAt(
+      center.x, center.y + dist, center.z + dist,
+      center.x, center.y,        center.z,
+      true,
+    );
+  }
+}
+
+/** Render the clash table rows (async — fetches element names per row) */
+async function renderClashTable(clashes, modelAId, modelBId) {
+  if (!clashTbodyEl) return;
+  clashTbodyEl.innerHTML = '';
+
+  const MAX_ROWS = 800;
+  const visible  = clashes.slice(0, MAX_ROWS);
+
+  for (let i = 0; i < visible.length; i++) {
+    const clash = visible[i];
+
+    // Storey: resolve for first 200 rows only to avoid blocking the UI;
+    // beyond that show '-' immediately and let the index warm in background.
+    const storey = i < 200
+      ? await coordinator.getStoreyName(clash.aModelId, clash.aLocalId)
+      : (coordinator.getStoreyName(clash.aModelId, clash.aLocalId)  // fire but don't await
+          .then(name => {
+            const cell = clashTbodyEl?.querySelector(`tr[data-clash-index="${i}"] td:nth-child(2)`);
+            if (cell) cell.textContent = name;
+          })
+          .catch(() => {}), '-');
+
+    // Try to resolve a human-readable name for each element
+    let nameA = String(clash.aLocalId);
+    let nameB = String(clash.bLocalId);
+    try {
+      const mA = fragments.list.get(clash.aModelId);
+      const mB = fragments.list.get(clash.bModelId);
+      if (mA) {
+        const [dA] = await mA.getItemsData([clash.aLocalId]) ?? [null];
+        nameA = dA?.ObjectType?.value ?? dA?.Name?.value ?? nameA;
+      }
+      if (mB) {
+        const [dB] = await mB.getItemsData([clash.bLocalId]) ?? [null];
+        nameB = dB?.ObjectType?.value ?? dB?.Name?.value ?? nameB;
+      }
+    } catch (_) { /* non-critical */ }
+
+    const tr = document.createElement('tr');
+    tr.dataset.clashIndex = i;
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${storey}</td>
+      <td class="clash-cell-a" title="${clash.aLocalId}">${nameA}</td>
+      <td class="clash-cell-b" title="${clash.bLocalId}">${nameB}</td>
+    `;
+    tr.addEventListener('click', () => {
+      clashTbodyEl.querySelectorAll('tr.selected').forEach(r => r.classList.remove('selected'));
+      tr.classList.add('selected');
+      isolateClashPair(clash).catch(console.warn);
+    });
+    clashTbodyEl.appendChild(tr);
+  }
+
+  if (clashes.length > MAX_ROWS) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td colspan="4" class="clash-more">… ${clashes.length - MAX_ROWS} choques adicionales no mostrados</td>`;
+    clashTbodyEl.appendChild(tr);
+  }
+}
+
+/** Run clash detection */
+document.getElementById('clash-run-btn')?.addEventListener('click', async () => {
+  const aId = clashModelAEl?.value;
+  const bId = clashModelBEl?.value;
+
+  if (!aId || !bId) { updateClashStatus('⚠️ Selecciona ambos modelos'); return; }
+  if (aId === bId)  { updateClashStatus('⚠️ Selecciona modelos distintos'); return; }
+
+  updateClashStatus('⏳ Iniciando análisis…');
+  if (clashResultsEl) clashResultsEl.style.display = 'none';
+
+  try {
+    // Read tolerance (soft-clash threshold in metres; 0 = report all AABB overlaps)
+    const toleranceVal = parseFloat(document.getElementById('clash-tolerance')?.value ?? '0') || 0;
+    const clashes = await coordinator.detectClashes(aId, bId, false, toleranceVal);
+    _lastClashes = clashes;
+
+    if (clashSummaryEl) {
+      clashSummaryEl.innerHTML = clashes.length === 0
+        ? '<span class="clash-ok">✓ Sin choques detectados</span>'
+        : `<span class="clash-count">${clashes.length}</span> choque${clashes.length !== 1 ? 's' : ''} detectado${clashes.length !== 1 ? 's' : ''}`;
+    }
+
+    if (clashResultsEl) clashResultsEl.style.display = 'flex';
+    updateClashStatus('');
+    await renderClashTable(clashes, aId, bId);
+  } catch (err) {
+    console.error('[Clash]', err);
+    updateClashStatus('❌ Error: ' + err.message);
+  }
+});
+
+/** Align MEP to Structural */
+document.getElementById('clash-align-btn')?.addEventListener('click', () => {
+  const aId = clashModelAEl?.value;
+  const bId = clashModelBEl?.value;
+  if (!aId || !bId || aId === bId) { updateClashStatus('⚠️ Selecciona modelos distintos'); return; }
+  coordinator.applyBaseCoordinateSystem(aId, bId);
+  fragments.core.update(true);
+  updateClashStatus('✓ Modelos alineados');
+});
+
+/** Toggle clash panel — docked right column */
+const viewerContainer = document.querySelector('.viewer-container');
+const toolClashBtn    = document.getElementById('tool-clash');
+
+toolClashBtn?.addEventListener('click', () => {
+  const isOpen = viewerContainer?.classList.toggle('viewer-has-clash');
+  toolClashBtn.classList.toggle('active', isOpen);
+  if (isOpen) updateClashSelectors();
+});
+
+document.getElementById('clash-close')?.addEventListener('click', () => {
+  viewerContainer?.classList.remove('viewer-has-clash');
+  toolClashBtn?.classList.remove('active');
+});
+
 console.log('🎉 Listo');
